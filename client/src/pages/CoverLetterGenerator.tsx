@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { PageHeader } from "@/components/PageHeader";
 import { useDocuments } from "@/hooks/use-documents";
 import { useGenerateCoverLetter } from "@/hooks/use-analysis";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,18 @@ export default function CoverLetterGenerator() {
   const [selectedDocId, setSelectedDocId] = useState<string>("");
   const [generatedContent, setGeneratedContent] = useState("");
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const jd = searchParams.get('jobDescription');
+    const cv = searchParams.get('cvContent');
+    if (jd) setJobDescription(jd);
+    // Find doc ID by content if passed, or just use the first available CV
+    const cvs = documents?.filter(d => d.type === 'cv') || [];
+    if (cvs.length > 0 && !selectedDocId) {
+      setSelectedDocId(cvs[0].id.toString());
+    }
+  }, [documents]);
 
   const cvs = documents?.filter(d => d.type === 'cv') || [];
 

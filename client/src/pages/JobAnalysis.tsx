@@ -168,6 +168,44 @@ export default function JobAnalysis() {
                    </div>
                  </div>
               </div>
+
+              {/* Next Steps Section */}
+              <div className="bg-indigo-900 text-white p-8 rounded-3xl shadow-lg relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                
+                <h3 className="text-xl font-bold mb-4 relative z-10 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5" /> Next Steps
+                </h3>
+                <p className="text-indigo-100 mb-6 relative z-10">
+                  Ready to take the next step? Use these AI-powered tools to polish your application.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-4 relative z-10">
+                  <button 
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      params.set('jobDescription', jobDescription);
+                      params.set('cvContent', documents?.find(d => d.id.toString() === selectedDocId)?.content || '');
+                      window.location.href = `/cover-letter?${params.toString()}`;
+                    }}
+                    className="flex-1 px-6 py-3 bg-white text-indigo-900 rounded-xl font-bold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    Generate cover letter draft
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      params.set('jobDescription', jobDescription);
+                      params.set('missingSkills', JSON.stringify(result.missingSkills || []));
+                      params.set('cvContent', documents?.find(d => d.id.toString() === selectedDocId)?.content || '');
+                      window.location.href = `/cv-improve?${params.toString()}`;
+                    }}
+                    className="flex-1 px-6 py-3 bg-indigo-700 text-white rounded-xl font-bold text-sm hover:bg-indigo-600 border border-indigo-500 transition-colors flex items-center justify-center gap-2"
+                  >
+                    Improve CV with keywords
+                  </button>
+                </div>
+              </div>
             </motion.div>
           ) : (
             <div className="h-full bg-slate-100/50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center p-8">

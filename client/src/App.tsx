@@ -13,6 +13,7 @@ import Dashboard from "@/pages/Dashboard";
 import ApplicationTracker from "@/pages/ApplicationTracker";
 import Documents from "@/pages/Documents";
 import JobAnalysis from "@/pages/JobAnalysis";
+import CVImprove from "@/pages/CVImprove";
 import CoverLetterGenerator from "@/pages/CoverLetterGenerator";
 
 function Router() {
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/tracker" component={ApplicationTracker} />
       <Route path="/documents" component={Documents} />
       <Route path="/analysis" component={JobAnalysis} />
+      <Route path="/cv-improve" component={CVImprove} />
       <Route path="/cover-letter" component={CoverLetterGenerator} />
       
       {/* Fallback to 404 */}
