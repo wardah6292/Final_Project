@@ -4,15 +4,16 @@ import { useDocuments } from "@/hooks/use-documents";
 import { useGenerateCoverLetter } from "@/hooks/use-analysis";
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Copy, Check } from "lucide-react";
+import { Sparkles, Copy, Check, Save, RefreshCw, FileText } from "lucide-react";
 import { motion } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
+import { useCreateDocument } from "@/hooks/use-documents";
 
 export default function CoverLetterGenerator() {
   const { data: documents } = useDocuments();
   const generateMutation = useGenerateCoverLetter();
+  const createDoc = useCreateDocument();
+  const { toast } = useToast();
   
   const [jobDescription, setJobDescription] = useState("");
   const [company, setCompany] = useState("");
@@ -20,33 +21,62 @@ export default function CoverLetterGenerator() {
   const [selectedDocId, setSelectedDocId] = useState<string>("");
   const [generatedContent, setGeneratedContent] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const jd = searchParams.get('jobDescription');
-    const cv = searchParams.get('cvContent');
+    const comp = searchParams.get('company') || "Acme Corp";
+    const pos = searchParams.get('role') || "Job Role";
+    
     if (jd) setJobDescription(jd);
-    // Find doc ID by content if passed, or just use the first available CV
+    setCompany(comp);
+    setRole(pos);
+
     const cvs = documents?.filter(d => d.type === 'cv') || [];
     if (cvs.length > 0 && !selectedDocId) {
       setSelectedDocId(cvs[0].id.toString());
     }
   }, [documents]);
 
-  const cvs = documents?.filter(d => d.type === 'cv') || [];
+  // Auto-generate on first load if we have context
+  useEffect(() => {
+    if (jobDescription && selectedDocId && !generatedContent && !generateMutation.isPending) {
+      handleGenerate();
+    }
+  }, [jobDescription, selectedDocId]);
 
   const handleGenerate = () => {
-    if (!jobDescription || !selectedDocId) return;
     const doc = documents?.find(d => d.id.toString() === selectedDocId);
-    if (!doc) return;
+    if (!doc) {
+      // Placeholder if no AI or doc
+      setGeneratedContent(`Dear Hiring Manager at ${company || "the company"},\n\nI am excited to apply for the ${role || "position"} role. Based on my experience with ${doc?.name || "relevant projects"}, I believe I am a great fit...\n\nSincerely,\n[Your Name]`);
+      return;
+    }
 
     generateMutation.mutate({
       jobDescription,
       cvContent: doc.content,
-      company,
-      role
+      company: company || "Company",
+      role: role || "Position"
     }, {
       onSuccess: (data) => setGeneratedContent(data.content)
+    });
+  };
+
+  const handleSave = () => {
+    setIsSaving(true);
+    createDoc.mutate({
+      name: `Cover Letter - ${company || 'Draft'}`,
+      content: generatedContent,
+      type: "cover_letter",
+      userId: 1
+    }, {
+      onSuccess: () => {
+        setIsSaving(false);
+        toast({ title: "Saved!", description: "Cover letter saved to your documents." });
+      },
+      onError: () => setIsSaving(false)
     });
   };
 
@@ -59,100 +89,98 @@ export default function CoverLetterGenerator() {
   return (
     <Layout>
       <PageHeader 
-        title="Cover Letter Writer" 
-        description="Draft a tailored cover letter in seconds using AI."
+        title="Cover Letter Draft" 
+        description="Your AI-powered draft is ready for review."
       />
 
-      <div className="grid lg:grid-cols-2 gap-8 h-[calc(100vh-12rem)]">
-        {/* Form */}
-        <div className="space-y-6 overflow-y-auto pr-2">
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-             <div className="grid grid-cols-2 gap-4">
-               <div className="space-y-2">
-                 <Label>Company</Label>
-                 <Input value={company} onChange={e => setCompany(e.target.value)} placeholder="e.g. Google" className="rounded-xl border-slate-200" />
-               </div>
-               <div className="space-y-2">
-                 <Label>Role</Label>
-                 <Input value={role} onChange={e => setRole(e.target.value)} placeholder="e.g. Product Designer" className="rounded-xl border-slate-200" />
-               </div>
-             </div>
-             
-             <div className="space-y-2">
-               <Label>Select CV</Label>
-               <Select onValueChange={setSelectedDocId}>
-                <SelectTrigger className="w-full h-12 rounded-xl border-slate-200">
-                  <SelectValue placeholder="Choose a CV..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {cvs.map(doc => (
-                    <SelectItem key={doc.id} value={doc.id.toString()}>{doc.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-             </div>
-
-             <div className="space-y-2">
-               <Label>Job Description</Label>
-               <Textarea 
-                 value={jobDescription} 
-                 onChange={e => setJobDescription(e.target.value)} 
-                 placeholder="Paste full JD here..." 
-                 className="min-h-[200px] rounded-xl border-slate-200"
-               />
-             </div>
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Left: Context */}
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+            <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+              <FileText className="w-4 h-4 text-slate-400" /> Job Context
+            </h4>
+            <div className="space-y-3">
+              <div>
+                <span className="text-xs font-bold text-slate-400 uppercase">Company</span>
+                <p className="font-bold text-slate-800">{company || "Acme Corp"}</p>
+              </div>
+              <div>
+                <span className="text-xs font-bold text-slate-400 uppercase">Role</span>
+                <p className="font-bold text-slate-800">{role || "Job Role"}</p>
+              </div>
+              <div>
+                <span className="text-xs font-bold text-slate-400 uppercase">Description Summary</span>
+                <p className="text-sm text-slate-600 line-clamp-4 bg-slate-50 p-3 rounded-xl mt-1">
+                  {jobDescription}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <button 
-            onClick={handleGenerate}
-            disabled={generateMutation.isPending || !jobDescription || !selectedDocId}
-            className="w-full h-14 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-purple-200 hover:shadow-2xl hover:-translate-y-1 transition-all disabled:opacity-50 disabled:transform-none"
-          >
-            {generateMutation.isPending ? (
-              <span className="flex items-center gap-2 justify-center">
-                <Sparkles className="w-5 h-5 animate-spin" /> Writing Magic...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2 justify-center">
-                <Sparkles className="w-5 h-5" /> Generate Letter
-              </span>
-            )}
-          </button>
+          <div className="bg-indigo-900 text-white p-6 rounded-[2rem] shadow-lg">
+            <h4 className="font-bold mb-2 flex items-center gap-2">
+              <Sparkles className="w-5 h-5" /> AI Guidance
+            </h4>
+            <p className="text-sm text-indigo-100 leading-relaxed italic">
+              "We've focused on matching your experience with the key requirements mentioned in the JD. Don't forget to add a personal touch!"
+            </p>
+          </div>
         </div>
 
-        {/* Output */}
-        <div className="relative h-full">
-           {generatedContent ? (
-             <motion.div 
-               initial={{ opacity: 0, scale: 0.95 }}
-               animate={{ opacity: 1, scale: 1 }}
-               className="h-full bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden flex flex-col"
-             >
-               <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-                 <h3 className="font-bold text-slate-700">Generated Draft</h3>
-                 <button 
-                   onClick={copyToClipboard}
-                   className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
-                 >
-                   {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-slate-500" />}
-                   {copied ? "Copied" : "Copy Text"}
-                 </button>
-               </div>
-               <textarea 
-                 className="flex-1 p-6 resize-none focus:outline-none text-slate-700 leading-relaxed font-serif text-lg"
-                 value={generatedContent}
-                 onChange={e => setGeneratedContent(e.target.value)}
-               />
-             </motion.div>
-           ) : (
-             <div className="h-full bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center p-8">
-               <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-6">
-                 <Sparkles className="w-10 h-10 text-purple-200" />
-               </div>
-               <h3 className="text-xl font-bold text-slate-400 mb-2">Magic Awaits</h3>
-               <p className="text-slate-400 max-w-xs">Fill in the details and watch AI write your first draft.</p>
-             </div>
-           )}
+        {/* Right: Editor */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl flex flex-col h-[600px] relative">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">Edit Draft</h3>
+                <p className="text-xs text-slate-400 mt-1">This is a draft — you can edit it before using. ✨</p>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleGenerate}
+                  disabled={generateMutation.isPending}
+                  className="p-2.5 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100 transition-colors"
+                  title="Regenerate draft"
+                >
+                  <RefreshCw className={`w-5 h-5 ${generateMutation.isPending ? 'animate-spin' : ''}`} />
+                </button>
+                <button 
+                  onClick={copyToClipboard}
+                  className="p-2.5 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100 transition-colors"
+                  title="Copy to clipboard"
+                >
+                  {copied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            <Textarea 
+              className="flex-1 p-0 border-none focus-visible:ring-0 resize-none text-slate-700 leading-relaxed font-serif text-lg bg-transparent"
+              value={generatedContent}
+              onChange={e => setGeneratedContent(e.target.value)}
+              placeholder="Generating your draft..."
+            />
+
+            {generateMutation.isPending && (
+              <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center rounded-[2rem] z-10">
+                <div className="flex flex-col items-center gap-4">
+                  <Sparkles className="w-12 h-12 text-primary animate-pulse" />
+                  <p className="font-bold text-slate-800">Writing your story...</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-4">
+            <button 
+              onClick={handleSave}
+              disabled={isSaving || !generatedContent}
+              className="flex-1 h-14 bg-primary text-white rounded-2xl font-bold text-lg shadow-xl shadow-primary/20 hover:shadow-2xl transition-all flex items-center justify-center gap-2"
+            >
+              <Save className="w-5 h-5" /> {isSaving ? "Saving..." : "Save cover letter to this application"}
+            </button>
+          </div>
         </div>
       </div>
     </Layout>
