@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useDocuments, useCreateDocument } from "@/hooks/use-documents";
 import { Textarea } from "@/components/ui/textarea";
 
+import { ExportStep } from "@/components/ExportStep";
+
 export default function CVImprove() {
   const [location] = useLocation();
   const { toast } = useToast();
@@ -24,6 +26,7 @@ export default function CVImprove() {
   const [isSaving, setIsSaving] = useState(false);
   const [hasAppliedKeywords, setHasAppliedKeywords] = useState(false);
   const [originalContent, setOriginalContent] = useState("");
+  const [savedDocId, setSavedDocId] = useState<number | null>(null);
 
   const cvs = documents?.filter(d => d.type === 'cv') || [];
 
@@ -57,8 +60,9 @@ export default function CVImprove() {
       type: "cv",
       userId: 1
     }, {
-      onSuccess: () => {
+      onSuccess: (data) => {
         setIsSaving(false);
+        setSavedDocId(data.id);
         toast({ title: "Draft Saved! ✨", description: "Your edited CV has been saved to Documents." });
       },
       onError: () => setIsSaving(false)
@@ -72,7 +76,15 @@ export default function CVImprove() {
         description="Refine your CV to perfectly match the job description."
       />
 
-      {!cvSource ? (
+      {savedDocId ? (
+        <div className="max-w-2xl mx-auto py-12">
+          <ExportStep 
+            content={cvContent} 
+            filename={`CV_Draft_${new Date().toLocaleDateString().replace(/\//g, '_')}`} 
+            shareId={savedDocId} 
+          />
+        </div>
+      ) : !cvSource ? (
         <div className="flex flex-col items-center justify-center py-12">
           <h3 className="text-2xl font-bold text-slate-800 mb-8">Where should we start?</h3>
           <div className="grid md:grid-cols-2 gap-6 w-full max-w-2xl">

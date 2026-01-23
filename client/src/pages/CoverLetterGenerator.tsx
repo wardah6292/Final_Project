@@ -8,6 +8,8 @@ import { Sparkles, Copy, Check, Save, RefreshCw, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateDocument } from "@/hooks/use-documents";
 
+import { ExportStep } from "@/components/ExportStep";
+
 export default function CoverLetterGenerator() {
   const { data: documents } = useDocuments();
   const generateMutation = useGenerateCoverLetter();
@@ -21,6 +23,7 @@ export default function CoverLetterGenerator() {
   const [generatedContent, setGeneratedContent] = useState("");
   const [copied, setCopied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [savedDocId, setSavedDocId] = useState<number | null>(null);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -36,7 +39,7 @@ export default function CoverLetterGenerator() {
     if (cvs.length > 0 && !selectedDocId) {
       setSelectedDocId(cvs[0].id.toString());
     }
-  }, [documents]);
+  }, [documents, selectedDocId]);
 
   // Auto-generate on first load if we have context
   useEffect(() => {
@@ -71,8 +74,9 @@ export default function CoverLetterGenerator() {
       type: "cover_letter",
       userId: 1
     }, {
-      onSuccess: () => {
+      onSuccess: (data) => {
         setIsSaving(false);
+        setSavedDocId(data.id);
         toast({ title: "Saved!", description: "Cover letter saved to your documents." });
       },
       onError: () => setIsSaving(false)
@@ -92,7 +96,16 @@ export default function CoverLetterGenerator() {
         description="Your AI-powered draft is ready for review."
       />
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      {savedDocId ? (
+        <div className="max-w-2xl mx-auto py-12">
+          <ExportStep 
+            content={generatedContent} 
+            filename={`Cover_Letter_${company.replace(/\s+/g, '_')}`} 
+            shareId={savedDocId} 
+          />
+        </div>
+      ) : (
+        <div className="grid lg:grid-cols-3 gap-8">
         {/* Left: Context */}
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">

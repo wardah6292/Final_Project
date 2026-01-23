@@ -15,6 +15,7 @@ import Documents from "@/pages/Documents";
 import JobAnalysis from "@/pages/JobAnalysis";
 import CVImprove from "@/pages/CVImprove";
 import CoverLetterGenerator from "@/pages/CoverLetterGenerator";
+import SharePage from "@/pages/SharePage";
 
 function Router() {
   return (
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/analysis" component={JobAnalysis} />
       <Route path="/cv-improve" component={CVImprove} />
       <Route path="/cover-letter" component={CoverLetterGenerator} />
+      <Route path="/share/:id" component={SharePage} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />
