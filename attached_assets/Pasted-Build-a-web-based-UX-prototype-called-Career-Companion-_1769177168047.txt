@@ -1,0 +1,98 @@
+Build a web-based UX prototype called “Career Companion” for students and early-career job seekers.
+
+Goal:
+Help users stay organised while applying for jobs/internships and reduce effort by offering job-fit analysis and cover letter generation. This tool supports clarity and decision-making; it does NOT auto-apply to jobs and does not guarantee outcomes.
+
+Style requirements (make it fun + playful):
+- Friendly tone, supportive microcopy, light emojis (👋✨)
+- Card-based layout, rounded corners, soft pastel background
+- Modern, clean typography and clear spacing
+- Simple, “companion-like” feel, not corporate
+
+Core user flow (screens):
+1) Welcome screen
+- Logo + app name
+- Message: “Hi, I’m your Career Companion 👋”
+- Short description: helps with tracking applications, job-fit analysis, and generating cover letters
+- Buttons:
+  - “Get started” → onboarding
+  - “Skip for now” → dashboard
+
+2) Onboarding questionnaire (step-by-step, one question per screen with a progress indicator)
+- Q1: “Which best describes you right now?”
+  Options: Student, Recent graduate, Early-career professional, Career switcher
+- Q2: “What are you mainly looking for?”
+  Options: Internships, Full-time roles, Exploring options, Improving applications
+- After onboarding → CV setup screen
+
+3) CV setup screen (must have BOTH options)
+- Option A: Upload CV (PDF/DOCX) — store file name (simulated) and/or uploaded file
+- Option B: Write/paste CV text into a large textarea — store as text
+- Provide reassuring microcopy: “You can edit this later. AI suggestions are reviewable.”
+- Continue → Cover letter setup
+
+4) Cover letter setup screen (optional, but must have BOTH options)
+- Option A: Upload cover letter — store file name (simulated) and/or uploaded file
+- Option B: Write/paste cover letter text into textarea — store as text
+- Buttons:
+  - “Continue” → Dashboard
+  - “Skip for now” → Dashboard
+
+5) Main Dashboard screen
+- Friendly greeting like “Welcome back 👋”
+- Show three main sections/cards:
+
+A) Application Tracker (card list)
+- List job applications as cards with:
+  company, role, status tag (Saved, Applied, Interview, Rejected)
+- Button: “Add application”
+- Clicking an application opens a detail view
+
+B) Job Fit Analysis (card/button)
+- Button: “Analyze a job”
+- Takes user to an analysis screen
+
+C) Documents (card)
+- Show CV status (uploaded/pasted)
+- Show cover letter status (optional)
+- Provide edit buttons
+
+6) Add Application screen
+- Form fields:
+  company, role, status, job description (textarea or paste)
+- Save → returns to dashboard and adds to tracker
+
+7) Job Fit Analysis screen
+- Inputs:
+  job description text area
+  CV text area (pre-filled if user pasted earlier, but editable)
+- Button: “Analyze Fit”
+- Show results in clearly separated sections:
+  - Fit score (0–100)
+  - Recommendation: Apply / Maybe / Skip
+  - Matching skills
+  - Missing skills
+  - ATS risks
+  - Short explanation (2–3 sentences)
+- Add a small transparency note: “AI can make mistakes; always review.”
+
+8) Cover Letter generator screen
+- Button: “Generate cover letter for this job”
+- Output shown in an editable textarea
+- Button: “Save to this application”
+- Explain: “This is a draft. You control the final version.”
+
+Data/storage requirements:
+- Store everything locally in the app (localStorage or in-memory is fine for prototype):
+  user onboarding answers, CV text/upload name, cover letter text/upload name,
+  applications list, analysis results, generated cover letter per application.
+- Make sure refreshing the page does not lose all data.
+
+Important constraints:
+- No LinkedIn/ATS integrations, no scraping
+- No automatic job applications
+- Keep it as a working prototype focusing on UX and clarity
+- Keep the code simple and the app stable
+
+Deliverable:
+A functioning multi-screen web app that demonstrates the complete flow and features above.
