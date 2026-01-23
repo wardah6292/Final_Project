@@ -7,20 +7,22 @@ import { useQueryClient } from "@tanstack/react-query";
 const steps = [
   {
     id: 1,
-    question: "Which best describes you?",
+    question: "Which best describes you right now?",
     options: [
       { id: "student", label: "Student", icon: GraduationCap },
       { id: "graduate", label: "Recent Graduate", icon: Briefcase },
-      { id: "experienced", label: "Experienced Pro", icon: Search },
+      { id: "pro", label: "Early-career professional", icon: Search },
+      { id: "switcher", label: "Career switcher", icon: Code },
     ]
   },
   {
     id: 2,
-    question: "What are you looking for?",
+    question: "What are you mainly looking for?",
     options: [
-      { id: "internship", label: "Internship", icon: Code }, // Just reused icons for variety
-      { id: "fulltime", label: "Full-time Role", icon: Palette },
-      { id: "contract", label: "Freelance/Contract", icon: LineChart },
+      { id: "internships", label: "Internships", icon: Search },
+      { id: "fulltime", label: "Full-time roles", icon: Briefcase },
+      { id: "exploring", label: "Exploring options", icon: Code },
+      { id: "improving", label: "Improving applications", icon: LineChart },
     ]
   }
 ];
@@ -43,7 +45,7 @@ export default function Onboarding() {
       } else {
         // Finish onboarding
         localStorage.setItem("career_companion_user", JSON.stringify(newAnswers));
-        setLocation("/dashboard");
+        setLocation("/setup-cv");
       }
     }, 400);
   };

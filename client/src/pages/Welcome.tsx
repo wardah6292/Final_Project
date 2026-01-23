@@ -35,12 +35,19 @@ export default function Welcome() {
             analyze job fit, and write stellar cover letters—all in one place.
           </p>
 
-          <Link href="/onboarding/step/1">
-            <button className="btn-bounce group flex items-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl font-bold text-lg shadow-xl shadow-primary/30 hover:shadow-2xl hover:bg-primary/90 transition-all">
-              Get Started
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link href="/onboarding/step/1">
+              <button className="btn-bounce group flex items-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl font-bold text-lg shadow-xl shadow-primary/30 hover:shadow-2xl hover:bg-primary/90 transition-all">
+                Get Started
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </Link>
+            <Link href="/dashboard">
+              <button className="px-8 py-4 bg-white text-slate-600 rounded-2xl font-bold text-lg border border-slate-200 hover:bg-slate-50 transition-all">
+                Skip for now
+              </button>
+            </Link>
+          </div>
         </motion.div>
 
         <motion.div 

@@ -2,13 +2,11 @@ import { Layout } from "@/components/Layout";
 import { PageHeader } from "@/components/PageHeader";
 import { useDocuments } from "@/hooks/use-documents";
 import { useAnalyzeFit } from "@/hooks/use-analysis";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { Sparkles, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { CircularProgress } from "@/components/ui/progress"; // Assuming custom component or we build it
+import { Sparkles, AlertTriangle, CheckCircle, XCircle, Search } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function JobAnalysis() {
   const { data: documents } = useDocuments();
@@ -17,6 +15,14 @@ export default function JobAnalysis() {
   const [jobDescription, setJobDescription] = useState("");
   const [selectedDocId, setSelectedDocId] = useState<string>("");
   const [result, setResult] = useState<any>(null);
+
+  // Pre-fill CV content if only one CV exists or based on local preference
+  useEffect(() => {
+    const cvs = documents?.filter(d => d.type === 'cv') || [];
+    if (cvs.length === 1 && !selectedDocId) {
+      setSelectedDocId(cvs[0].id.toString());
+    }
+  }, [documents, selectedDocId]);
 
   const handleAnalyze = () => {
     if (!jobDescription || !selectedDocId) return;
@@ -116,6 +122,17 @@ export default function JobAnalysis() {
                 </div>
               </div>
 
+              {/* Recommendation Card */}
+              <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" /> Recommendation: {result.recommendation}
+                </h4>
+                <p className="text-slate-600 bg-slate-50 p-4 rounded-xl italic">
+                  "{result.explanation}"
+                </p>
+                <p className="text-[10px] text-slate-400 mt-2">AI can make mistakes; always review. 🛡️</p>
+              </div>
+
               {/* Analysis Details */}
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-6">
                  <div>
@@ -142,11 +159,13 @@ export default function JobAnalysis() {
 
                  <div className="border-t border-slate-100 pt-6">
                    <h4 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
-                     <AlertTriangle className="w-5 h-5 text-amber-500" /> Recommendation
+                     <AlertTriangle className="w-5 h-5 text-amber-500" /> ATS Risks
                    </h4>
-                   <p className="text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl">
-                     {result.explanation || "No explanation provided."}
-                   </p>
+                   <div className="flex flex-wrap gap-2">
+                     {result.atsRisks?.map((risk: string) => (
+                       <span key={risk} className="px-3 py-1 bg-amber-50 text-amber-700 rounded-lg text-sm font-medium">{risk}</span>
+                     ))}
+                   </div>
                  </div>
               </div>
             </motion.div>

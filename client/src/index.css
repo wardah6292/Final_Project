@@ -46,6 +46,10 @@
   --radius: 1rem;
 }
 
+body {
+  background-color: #fdfaf6;
+}
+
 @layer base {
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;

@@ -43,7 +43,7 @@ export default function Dashboard() {
   return (
     <Layout>
       <PageHeader 
-        title="Welcome back! 👋" 
+        title="Welcome back! 👋✨" 
         description="Here's what's happening with your job search today."
       />
 
