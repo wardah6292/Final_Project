@@ -7,6 +7,8 @@ import NotFound from "@/pages/not-found";
 
 import Welcome from "@/pages/Welcome";
 import Onboarding from "@/pages/Onboarding";
+import CVSetup from "@/pages/CVSetup";
+import CLSetup from "@/pages/CLSetup";
 import Dashboard from "@/pages/Dashboard";
 import ApplicationTracker from "@/pages/ApplicationTracker";
 import Documents from "@/pages/Documents";
@@ -18,6 +20,8 @@ function Router() {
     <Switch>
       <Route path="/" component={Welcome} />
       <Route path="/onboarding/step/:step" component={Onboarding} />
+      <Route path="/setup-cv" component={CVSetup} />
+      <Route path="/setup-cl" component={CLSetup} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/tracker" component={ApplicationTracker} />
       <Route path="/documents" component={Documents} />
