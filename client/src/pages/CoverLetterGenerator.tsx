@@ -5,7 +5,6 @@ import { useGenerateCoverLetter } from "@/hooks/use-analysis";
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles, Copy, Check, Save, RefreshCw, FileText } from "lucide-react";
-import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateDocument } from "@/hooks/use-documents";
 
