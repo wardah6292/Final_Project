@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+
+  /* Soft, Friendly Pastel-inspired Palette */
+  /* Background: Very soft lavender/gray tint */
+  --background: 240 20% 98%; 
+  /* Foreground: Soft charcoal, not harsh black */
+  --foreground: 224 20% 20%;
+
+  /* Primary: Vibrant but soft Indigo/Violet */
+  --primary: 250 85% 60%;
+  --primary-foreground: 0 0% 100%;
+
+  /* Secondary: Soft Peach/Pink for accents */
+  --secondary: 340 85% 96%;
+  --secondary-foreground: 340 60% 45%;
+
+  /* Muted: Slate grays for secondary text */
+  --muted: 220 20% 94%;
+  --muted-foreground: 220 20% 50%;
+
+  /* Card: Pure white with soft warmth */
+  --card: 0 0% 100%;
+  --card-foreground: 224 20% 20%;
+
+  /* Borders: Very subtle */
+  --border: 220 20% 92%;
+  --input: 220 20% 92%;
+  
+  /* Accent: Mint/Teal for success/positive vibes */
+  --accent: 160 60% 96%;
+  --accent-foreground: 160 80% 30%;
+
+  /* Destructive: Soft Coral */
+  --destructive: 0 85% 95%;
+  --destructive-foreground: 0 70% 50%;
+
+  --ring: 250 85% 60%;
+  --radius: 1rem;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-bold tracking-tight text-slate-800;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl shadow-indigo-500/5;
+  }
+  
+  .btn-bounce {
+    @apply transition-transform active:scale-95 duration-150;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200;
+  }
+  
+  .nav-item-active {
+    @apply bg-primary/10 text-primary font-bold shadow-sm;
+  }
+
+  .nav-item-inactive {
+    @apply text-muted-foreground hover:bg-slate-100 hover:text-slate-900;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
