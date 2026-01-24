@@ -14,6 +14,7 @@ import ApplicationTracker from "@/pages/ApplicationTracker";
 import Documents from "@/pages/Documents";
 import JobAnalysis from "@/pages/JobAnalysis";
 import CVImprove from "@/pages/CVImprove";
+import PdfCvEditor from "@/pages/PdfCvEditor";
 import CoverLetterGenerator from "@/pages/CoverLetterGenerator";
 import SharePage from "@/pages/SharePage";
 
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/documents" component={Documents} />
       <Route path="/analysis" component={JobAnalysis} />
       <Route path="/cv-improve" component={CVImprove} />
+      <Route path="/cv/pdf-editor" component={PdfCvEditor} />
       <Route path="/cover-letter" component={CoverLetterGenerator} />
       <Route path="/share/:id" component={SharePage} />
       

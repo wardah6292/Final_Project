@@ -137,8 +137,14 @@ export default function CVImprove() {
             <button
               onClick={() => {
                 if (cvs.length > 0) {
-                  setCvContent(cvs[0].content);
-                  setCvSource("saved");
+                  const latestCv = cvs[0];
+                  // If it's a PDF (mock check for prototype) or if we want to force PDF editor
+                  if (initialPdfUrl || latestCv.name.toLowerCase().includes('.pdf')) {
+                    setLocation(`/cv/pdf-editor?pdfUrl=${encodeURIComponent(initialPdfUrl || '/sample-cv.pdf')}&missingSkills=${encodeURIComponent(JSON.stringify(missingSkills))}`);
+                  } else {
+                    setCvContent(latestCv.content);
+                    setCvSource("saved");
+                  }
                 } else {
                   toast({ title: "No saved CV", description: "Please paste your CV text instead.", variant: "destructive" });
                 }
