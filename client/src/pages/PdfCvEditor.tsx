@@ -62,8 +62,8 @@ export default function UnifiedPdfEditor() {
           setPdfUrl(result);
           setAnnotations([]);
           setUploadProgress(null);
-          setIsProcessing(false);
-          toast({ title: "PDF Uploaded", description: "You can now start editing." });
+          // Don't set isProcessing false here, wait for onLoadSuccess
+          toast({ title: "File Read Complete", description: "Now rendering your PDF..." });
         }, 500);
       };
 
@@ -264,6 +264,7 @@ export default function UnifiedPdfEditor() {
               onLoadError={(error) => {
                 console.error("PDF Load Error:", error);
                 setIsProcessing(false);
+                setPdfUrl(null); // Reset URL on error
                 toast({ 
                   title: "Rendering Error", 
                   description: "Could not display the PDF. It might be too large or corrupted.",
@@ -286,7 +287,7 @@ export default function UnifiedPdfEditor() {
                   renderAnnotationLayer={false} 
                   renderTextLayer={false} 
                   className="mb-4"
-                  loading={<div className="h-[1000px] w-[700px] bg-slate-50 animate-pulse rounded-xl" />}
+                  loading={<div className="h-[1000px] w-[700px] bg-white border border-slate-100 animate-pulse rounded-xl flex items-center justify-center text-slate-400">Loading Page {index + 1}...</div>}
                 />
               ))}
             </Document>
