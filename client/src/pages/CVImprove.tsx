@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { PageHeader } from "@/components/PageHeader";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ArrowRight, CheckCircle, Save, FileText, Type, Undo, Download, Trash2, Plus } from "lucide-react";
+import { Sparkles, ArrowRight, CheckCircle, Save, FileText, Type, Undo, Download, Trash2, Plus, FileUp } from "lucide-react";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useDocuments, useCreateDocument } from "@/hooks/use-documents";
@@ -228,8 +228,29 @@ export default function CVImprove() {
               <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-slate-400" /> Job Description
               </h4>
-              <div className="bg-slate-50 p-4 rounded-2xl text-sm text-slate-600 max-h-[300px] overflow-y-auto whitespace-pre-wrap">
+              <div className="bg-slate-50 p-4 rounded-2xl text-sm text-slate-600 max-h-[200px] overflow-y-auto whitespace-pre-wrap">
                 {jobDescription || "No job description provided."}
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+              <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-primary" /> Actions
+              </h4>
+              <div className="space-y-3">
+                <button
+                  onClick={() => setLocation('/cv/pdf-editor')}
+                  className="w-full py-3 bg-indigo-50 text-indigo-700 rounded-xl font-bold text-sm hover:bg-indigo-100 transition-all flex items-center justify-center gap-2"
+                >
+                  <FileUp className="w-4 h-4" /> Upload PDF Instead
+                </button>
+                <button
+                  onClick={handleSaveDraft}
+                  disabled={isSaving || !cvContent}
+                  className="w-full py-3 bg-green-500 text-white rounded-xl font-bold text-sm hover:bg-green-600 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-200"
+                >
+                  <Save className="w-4 h-4" /> {isSaving ? "Saving..." : "Save Final Draft"}
+                </button>
               </div>
             </div>
 
