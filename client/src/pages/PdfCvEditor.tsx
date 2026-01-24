@@ -261,6 +261,15 @@ export default function UnifiedPdfEditor() {
                 setNumPages(numPages);
                 setIsProcessing(false);
               }} 
+              onLoadError={(error) => {
+                console.error("PDF Load Error:", error);
+                setIsProcessing(false);
+                toast({ 
+                  title: "Rendering Error", 
+                  description: "Could not display the PDF. It might be too large or corrupted.",
+                  variant: "destructive" 
+                });
+              }}
               loading={
                 <div className="flex flex-col items-center gap-4 py-20">
                   <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -270,7 +279,15 @@ export default function UnifiedPdfEditor() {
               className="shadow-2xl"
             >
               {Array.from(new Array(numPages || 0), (el, index) => (
-                <Page key={`page_${index + 1}`} pageNumber={index + 1} width={700} renderAnnotationLayer={false} renderTextLayer={false} className="mb-4" />
+                <Page 
+                  key={`page_${index + 1}`} 
+                  pageNumber={index + 1} 
+                  width={700} 
+                  renderAnnotationLayer={false} 
+                  renderTextLayer={false} 
+                  className="mb-4"
+                  loading={<div className="h-[1000px] w-[700px] bg-slate-50 animate-pulse rounded-xl" />}
+                />
               ))}
             </Document>
 
