@@ -41,10 +41,18 @@ export default function UnifiedPdfEditor() {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type === "application/pdf") {
-      const url = URL.createObjectURL(file);
-      setPdfUrl(url);
-      setAnnotations([]);
-      toast({ title: "PDF Uploaded", description: "You can now start editing." });
+      toast({ title: "Uploading...", description: "Processing your PDF file." });
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        setPdfUrl(result);
+        setAnnotations([]);
+        toast({ title: "PDF Uploaded", description: "You can now start editing." });
+      };
+      reader.onerror = () => {
+        toast({ title: "Upload Failed", description: "There was an error reading the file.", variant: "destructive" });
+      };
+      reader.readAsDataURL(file);
     } else {
       toast({ title: "Invalid File", description: "Please upload a PDF document.", variant: "destructive" });
     }
