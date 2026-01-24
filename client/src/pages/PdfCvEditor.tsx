@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { PageHeader } from "@/components/PageHeader";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useLocation } from "wouter";
-import { Sparkles, Download, Save, Plus, MousePointer2, Trash2, Type, ArrowLeft } from "lucide-react";
+import { Sparkles, Download, Save, Plus, MousePointer2, Trash2, Type, ArrowLeft, Link2, Check, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
@@ -31,6 +31,8 @@ export default function PdfCvEditor() {
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
   const [isAddingText, setIsAddingText] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [docId, setDocId] = useState<number | null>(null);
 
   const handleAddAnnotation = (e: React.MouseEvent) => {
     if (!isAddingText || !pdfContainerRef.current) return;
@@ -72,7 +74,17 @@ export default function PdfCvEditor() {
 
   const handleSave = () => {
     localStorage.setItem(`cv_annotations_${pdfUrl}`, JSON.stringify(annotations));
+    if (!docId) setDocId(Date.now());
     toast({ title: "Saved!", description: "Your changes have been stored locally." });
+  };
+
+  const copyShareLink = () => {
+    const id = docId || Date.now();
+    const shareUrl = `${window.location.origin}/share/${id}?isPdf=true&pdfUrl=${encodeURIComponent(pdfUrl)}&annos=${encodeURIComponent(JSON.stringify(annotations))}`;
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    toast({ title: "Link Copied!", description: "Anyone with this link can view your annotated PDF." });
+    setTimeout(() => setCopied(false), 2000);
   };
 
   useEffect(() => {
@@ -82,23 +94,30 @@ export default function PdfCvEditor() {
 
   return (
     <Layout>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <button 
           onClick={() => window.history.back()}
           className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors font-medium"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to CV Improvements
+          <ArrowLeft className="w-4 h-4" /> Back
         </button>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
+          <button 
+            onClick={copyShareLink}
+            className="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+          >
+            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Link2 className="w-4 h-4" />}
+            {copied ? "Copied!" : "Share Link"}
+          </button>
           <button 
             onClick={handleSave}
-            className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-all flex items-center gap-2"
+            className="flex-1 md:flex-none px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
           >
             <Save className="w-4 h-4" /> Save Draft
           </button>
           <button 
             onClick={exportPdf}
-            className="px-4 py-2 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all flex items-center gap-2"
+            className="flex-1 md:flex-none px-4 py-2 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
           >
             <Download className="w-4 h-4" /> Download Updated PDF
           </button>
