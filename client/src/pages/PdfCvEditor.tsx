@@ -38,20 +38,34 @@ export default function UnifiedPdfEditor() {
 
   const savedCvs = documents?.filter(d => d.type === 'cv' && (d.name.toLowerCase().includes('.pdf') || d.content.startsWith('http'))) || [];
 
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type === "application/pdf") {
-      toast({ title: "Uploading...", description: "Processing your PDF file." });
+      setUploadProgress(0);
       const reader = new FileReader();
+      
+      reader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(progress);
+        }
+      };
+
       reader.onload = () => {
         const result = reader.result as string;
         setPdfUrl(result);
         setAnnotations([]);
+        setUploadProgress(null);
         toast({ title: "PDF Uploaded", description: "You can now start editing." });
       };
+
       reader.onerror = () => {
+        setUploadProgress(null);
         toast({ title: "Upload Failed", description: "There was an error reading the file.", variant: "destructive" });
       };
+
       reader.readAsDataURL(file);
     } else {
       toast({ title: "Invalid File", description: "Please upload a PDF document.", variant: "destructive" });
@@ -110,12 +124,34 @@ export default function UnifiedPdfEditor() {
         <div className="max-w-4xl mx-auto py-12 space-y-12">
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white p-8 rounded-[2.5rem] border-2 border-dashed border-slate-200 hover:border-primary/40 hover:bg-primary/5 transition-all flex flex-col items-center text-center group cursor-pointer relative">
-              <input type="file" accept=".pdf" onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+              <input type="file" accept=".pdf" onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer" disabled={uploadProgress !== null} />
               <div className="w-20 h-20 bg-primary/10 text-primary rounded-[2rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <FileUp className="w-10 h-10" />
+                {uploadProgress !== null ? (
+                  <div className="relative w-12 h-12 flex items-center justify-center">
+                    <svg className="w-full h-full transform -rotate-90">
+                      <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-primary/20" />
+                      <circle 
+                        cx="24" cy="24" r="20" 
+                        stroke="currentColor" 
+                        strokeWidth="4" 
+                        fill="transparent" 
+                        strokeDasharray={125.6}
+                        strokeDashoffset={125.6 - (125.6 * uploadProgress / 100)}
+                        className="text-primary transition-all duration-300" 
+                      />
+                    </svg>
+                    <span className="absolute text-[10px] font-bold">{uploadProgress}%</span>
+                  </div>
+                ) : (
+                  <FileUp className="w-10 h-10" />
+                )}
               </div>
-              <h3 className="text-2xl font-bold text-slate-800 mb-2">Upload PDF</h3>
-              <p className="text-slate-500">Drop your CV here or click to browse</p>
+              <h3 className="text-2xl font-bold text-slate-800 mb-2">
+                {uploadProgress !== null ? `Uploading... ${uploadProgress}%` : "Upload PDF"}
+              </h3>
+              <p className="text-slate-500">
+                {uploadProgress !== null ? "Almost there!" : "Drop your CV here or click to browse"}
+              </p>
             </div>
 
             <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col">
