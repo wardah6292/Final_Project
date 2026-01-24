@@ -1,9 +1,8 @@
 import { Layout } from "@/components/Layout";
 import { PageHeader } from "@/components/PageHeader";
 import { useLocation } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ArrowRight, CheckCircle, Save, FileText, Type, Undo, Download, Trash2, Plus, FileUp } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useDocuments, useCreateDocument } from "@/hooks/use-documents";
 import { Textarea } from "@/components/ui/textarea";

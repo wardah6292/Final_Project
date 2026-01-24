@@ -7,8 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
 import { Sparkles, AlertTriangle, CheckCircle, XCircle, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useLocation } from "wouter";
 
 export default function JobAnalysis() {
+  const [, setLocation] = useLocation();
   const { data: documents } = useDocuments();
   const analyzeMutation = useAnalyzeFit();
   
@@ -186,7 +188,7 @@ export default function JobAnalysis() {
                       const params = new URLSearchParams();
                       params.set('jobDescription', jobDescription);
                       params.set('cvContent', documents?.find(d => d.id.toString() === selectedDocId)?.content || '');
-                      window.location.href = `/cover-letter?${params.toString()}`;
+                      setLocation(`/cover-letter?${params.toString()}`);
                     }}
                     className="flex-1 px-6 py-3 bg-white text-indigo-900 rounded-xl font-bold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2"
                   >
@@ -198,7 +200,7 @@ export default function JobAnalysis() {
                       params.set('jobDescription', jobDescription);
                       params.set('missingSkills', JSON.stringify(result.missingSkills || []));
                       params.set('cvContent', documents?.find(d => d.id.toString() === selectedDocId)?.content || '');
-                      window.location.href = `/cv-improve?${params.toString()}`;
+                      setLocation(`/cv-improve?${params.toString()}`);
                     }}
                     className="flex-1 px-6 py-3 bg-indigo-700 text-white rounded-xl font-bold text-sm hover:bg-indigo-600 border border-indigo-500 transition-colors flex items-center justify-center gap-2"
                   >
