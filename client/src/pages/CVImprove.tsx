@@ -24,7 +24,7 @@ interface Annotation {
 }
 
 export default function CVImprove() {
-  const [location] = useLocation();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { data: documents } = useDocuments();
   const createDoc = useCreateDocument();
