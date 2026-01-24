@@ -135,20 +135,7 @@ export default function CVImprove() {
           <h3 className="text-2xl font-bold text-slate-800 mb-8">Where should we start?</h3>
           <div className="grid md:grid-cols-2 gap-6 w-full max-w-2xl">
             <button
-              onClick={() => {
-                if (cvs.length > 0) {
-                  const latestCv = cvs[0];
-                  // If it's a PDF (mock check for prototype) or if we want to force PDF editor
-                  if (initialPdfUrl || latestCv.name.toLowerCase().includes('.pdf')) {
-                    setLocation(`/cv/pdf-editor?pdfUrl=${encodeURIComponent(initialPdfUrl || '/sample-cv.pdf')}&missingSkills=${encodeURIComponent(JSON.stringify(missingSkills))}`);
-                  } else {
-                    setCvContent(latestCv.content);
-                    setCvSource("saved");
-                  }
-                } else {
-                  toast({ title: "No saved CV", description: "Please paste your CV text instead.", variant: "destructive" });
-                }
-              }}
+              onClick={() => setLocation('/cv/pdf-editor')}
               className="p-8 rounded-[2rem] border-2 border-slate-100 bg-white hover:border-primary/20 hover:shadow-xl transition-all flex flex-col items-center gap-4 group"
             >
               <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
