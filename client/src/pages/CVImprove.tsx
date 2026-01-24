@@ -2,31 +2,49 @@ import { Layout } from "@/components/Layout";
 import { PageHeader } from "@/components/PageHeader";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ArrowRight, CheckCircle, Save, FileText, Type, Undo } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Sparkles, ArrowRight, CheckCircle, Save, FileText, Type, Undo, Download, Trash2, Plus } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useDocuments, useCreateDocument } from "@/hooks/use-documents";
 import { Textarea } from "@/components/ui/textarea";
-
 import { ExportStep } from "@/components/ExportStep";
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
+
+// Set worker for react-pdf
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+
+interface Annotation {
+  id: number;
+  text: string;
+  x: number;
+  y: number;
+}
 
 export default function CVImprove() {
   const [location] = useLocation();
   const { toast } = useToast();
   const { data: documents } = useDocuments();
   const createDoc = useCreateDocument();
+  const pdfContainerRef = useRef<HTMLDivElement>(null);
   
   const searchParams = new URLSearchParams(window.location.search);
   const jobDescription = searchParams.get('jobDescription') || '';
   const missingSkills = JSON.parse(searchParams.get('missingSkills') || '[]');
   const initialCvContent = searchParams.get('cvContent') || '';
+  const initialPdfUrl = searchParams.get('pdfUrl') || '';
 
-  const [cvSource, setCvSource] = useState<"saved" | "paste" | null>(null);
+  const [cvSource, setCvSource] = useState<"saved" | "paste" | "pdf" | null>(initialPdfUrl ? "pdf" : null);
   const [cvContent, setCvContent] = useState(initialCvContent);
   const [isSaving, setIsSaving] = useState(false);
   const [hasAppliedKeywords, setHasAppliedKeywords] = useState(false);
   const [originalContent, setOriginalContent] = useState("");
   const [savedDocId, setSavedDocId] = useState<number | null>(null);
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [annotations, setAnnotations] = useState<Annotation[]>([]);
 
   const cvs = documents?.filter(d => d.type === 'cv') || [];
 
@@ -67,6 +85,34 @@ export default function CVImprove() {
       },
       onError: () => setIsSaving(false)
     });
+  };
+
+  const addAnnotation = (e: React.MouseEvent) => {
+    if (cvSource !== 'pdf' || !pdfContainerRef.current) return;
+    const rect = pdfContainerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const newNote: Annotation = {
+      id: Date.now(),
+      text: "New note",
+      x,
+      y
+    };
+    setAnnotations([...annotations, newNote]);
+  };
+
+  const exportAnnotatedPdf = async () => {
+    if (!pdfContainerRef.current) return;
+    const canvas = await html2canvas(pdfContainerRef.current);
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save('annotated_cv.pdf');
+    toast({ title: "Exported!", description: "Annotated PDF downloaded." });
   };
 
   return (
@@ -114,6 +160,72 @@ export default function CVImprove() {
               <span className="font-bold text-lg">Paste CV Text</span>
             </button>
           </div>
+        </div>
+      ) : cvSource === "pdf" ? (
+        <div className="max-w-5xl mx-auto space-y-6 pb-20">
+           <div className="flex justify-between items-center bg-indigo-900 text-white p-6 rounded-[2rem] shadow-lg">
+             <div>
+               <h4 className="font-bold flex items-center gap-2">
+                 <Sparkles className="w-5 h-5" /> PDF Review & Annotation
+               </h4>
+               <p className="text-sm text-indigo-100">Click anywhere on the PDF to add a note.</p>
+             </div>
+             <button 
+               onClick={exportAnnotatedPdf}
+               className="px-6 py-2 bg-white text-indigo-900 rounded-xl font-bold hover:bg-indigo-50 transition-colors flex items-center gap-2"
+             >
+               <Download className="w-4 h-4" /> Export Annotated PDF
+             </button>
+           </div>
+           
+           <div 
+             ref={pdfContainerRef}
+             onClick={addAnnotation}
+             className="relative bg-slate-200 rounded-[2rem] overflow-hidden shadow-inner flex flex-col items-center p-8 min-h-[800px] cursor-crosshair"
+           >
+             <Document
+                file={initialPdfUrl}
+                onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                className="shadow-2xl"
+              >
+                {Array.from(new Array(numPages || 0), (el, index) => (
+                  <Page 
+                    key={`page_${index + 1}`} 
+                    pageNumber={index + 1} 
+                    width={800}
+                  />
+                ))}
+              </Document>
+
+              {annotations.map(anno => (
+                <div 
+                  key={anno.id}
+                  style={{ left: anno.x, top: anno.y }}
+                  className="absolute z-20 group"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="relative">
+                    <div className="w-4 h-4 bg-primary rounded-full shadow-lg cursor-move border-2 border-white" />
+                    <input 
+                      type="text"
+                      autoFocus
+                      value={anno.text}
+                      onChange={e => {
+                        const newAnnos = annotations.map(a => a.id === anno.id ? { ...a, text: e.target.value } : a);
+                        setAnnotations(newAnnos);
+                      }}
+                      className="absolute left-6 -top-2 bg-white border border-slate-200 shadow-xl rounded-lg px-3 py-1.5 text-sm font-medium focus:ring-2 focus:ring-primary outline-none min-w-[150px]"
+                    />
+                    <button 
+                      onClick={() => setAnnotations(annotations.filter(a => a.id !== anno.id))}
+                      className="absolute -right-16 -top-2 opacity-0 group-hover:opacity-100 bg-red-50 text-red-500 p-1.5 rounded-lg transition-opacity"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+           </div>
         </div>
       ) : (
         <div className="grid lg:grid-cols-3 gap-8">
