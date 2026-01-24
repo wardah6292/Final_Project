@@ -39,11 +39,13 @@ export default function UnifiedPdfEditor() {
   const savedCvs = documents?.filter(d => d.type === 'cv' && (d.name.toLowerCase().includes('.pdf') || d.content.startsWith('http'))) || [];
 
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type === "application/pdf") {
       setUploadProgress(0);
+      setIsProcessing(true);
       const reader = new FileReader();
       
       reader.onprogress = (event) => {
@@ -55,14 +57,19 @@ export default function UnifiedPdfEditor() {
 
       reader.onload = () => {
         const result = reader.result as string;
-        setPdfUrl(result);
-        setAnnotations([]);
-        setUploadProgress(null);
-        toast({ title: "PDF Uploaded", description: "You can now start editing." });
+        // Small delay to show 100% and then transition
+        setTimeout(() => {
+          setPdfUrl(result);
+          setAnnotations([]);
+          setUploadProgress(null);
+          setIsProcessing(false);
+          toast({ title: "PDF Uploaded", description: "You can now start editing." });
+        }, 500);
       };
 
       reader.onerror = () => {
         setUploadProgress(null);
+        setIsProcessing(false);
         toast({ title: "Upload Failed", description: "There was an error reading the file.", variant: "destructive" });
       };
 
@@ -248,7 +255,20 @@ export default function UnifiedPdfEditor() {
               isAddingText ? 'cursor-crosshair border-primary/40 bg-primary/5 shadow-inner' : 'cursor-default'
             }`}
           >
-            <Document file={pdfUrl} onLoadSuccess={({ numPages }) => setNumPages(numPages)} className="shadow-2xl">
+            <Document 
+              file={pdfUrl} 
+              onLoadSuccess={({ numPages }) => {
+                setNumPages(numPages);
+                setIsProcessing(false);
+              }} 
+              loading={
+                <div className="flex flex-col items-center gap-4 py-20">
+                  <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                  <p className="text-slate-500 font-medium">Rendering PDF pages...</p>
+                </div>
+              }
+              className="shadow-2xl"
+            >
               {Array.from(new Array(numPages || 0), (el, index) => (
                 <Page key={`page_${index + 1}`} pageNumber={index + 1} width={700} renderAnnotationLayer={false} renderTextLayer={false} className="mb-4" />
               ))}
