@@ -10,7 +10,8 @@ import html2canvas from "html2canvas";
 import { useDocuments } from "@/hooks/use-documents";
 
 // Set worker for react-pdf
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+// Use the local worker file if available, otherwise use a CDN
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 interface Annotation {
   id: string;
@@ -270,6 +271,11 @@ export default function UnifiedPdfEditor() {
                   description: "Could not display the PDF. It might be too large or corrupted.",
                   variant: "destructive" 
                 });
+              }}
+              options={{
+                cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                cMapPacked: true,
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
               }}
               loading={
                 <div className="flex flex-col items-center gap-4 py-20">
