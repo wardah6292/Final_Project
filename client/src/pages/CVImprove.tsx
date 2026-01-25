@@ -140,7 +140,7 @@ export default function CVImprove() {
               <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                 <FileText className="w-8 h-8" />
               </div>
-              <span className="font-bold text-lg">Use Saved CV</span>
+              <span className="font-bold text-lg">Use CV Draft Editor</span>
             </button>
             <button
               onClick={() => setCvSource("paste")}
