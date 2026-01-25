@@ -52,15 +52,10 @@ export default function CoverLetterGenerator() {
 
   const handleGenerate = () => {
     const doc = documents?.find(d => d.id.toString() === selectedDocId);
-    if (!doc) {
-      // Placeholder if no AI or doc
-      setGeneratedContent(`Dear Hiring Manager at ${company || "the company"},\n\nI am excited to apply for the ${role || "position"} role. Based on my experience with ${doc?.name || "relevant projects"}, I believe I am a great fit...\n\nSincerely,\n[Your Name]`);
-      return;
-    }
-
+    
     generateMutation.mutate({
       jobDescription,
-      cvContent: doc.content,
+      cvContent: doc?.content || "",
       company: company || "Company",
       role: role || "Position"
     }, {
