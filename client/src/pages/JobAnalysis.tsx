@@ -178,13 +178,13 @@ export default function JobAnalysis() {
               </div>
 
               {/* Next Steps Section */}
-              <div className="bg-indigo-900 text-white p-8 rounded-3xl shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <div className="bg-indigo-900 text-white p-8 rounded-[2.5rem] shadow-lg relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/20 transition-colors" />
                 
-                <h3 className="text-xl font-bold mb-4 relative z-10 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5" /> Next Steps
+                <h3 className="text-2xl font-bold mb-4 relative z-10 flex items-center gap-3">
+                  <Sparkles className="w-6 h-6 text-indigo-300" /> Next Steps
                 </h3>
-                <p className="text-indigo-100 mb-6 relative z-10">
+                <p className="text-indigo-50/90 text-lg leading-relaxed mb-8 relative z-10 font-medium">
                   Ready to take the next step? Use these AI-powered tools to polish your application.
                 </p>
                 
@@ -196,7 +196,7 @@ export default function JobAnalysis() {
                       params.set('cvContent', documents?.find(d => d.id.toString() === selectedDocId)?.content || '');
                       setLocation(`/cover-letter?${params.toString()}`);
                     }}
-                    className="flex-1 px-6 py-3 bg-white text-indigo-900 rounded-xl font-bold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 px-6 py-3.5 bg-white text-indigo-900 rounded-2xl font-bold text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2 shadow-lg"
                   >
                     Generate cover letter draft
                   </button>
@@ -208,7 +208,7 @@ export default function JobAnalysis() {
                       params.set('cvContent', documents?.find(d => d.id.toString() === selectedDocId)?.content || '');
                       setLocation(`/cv-improve?${params.toString()}`);
                     }}
-                    className="flex-1 px-6 py-3 bg-indigo-700 text-white rounded-xl font-bold text-sm hover:bg-indigo-600 border border-indigo-500 transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 px-6 py-3.5 bg-indigo-700 text-white rounded-2xl font-bold text-sm hover:bg-indigo-600 border border-indigo-500 transition-colors flex items-center justify-center gap-2 shadow-lg"
                   >
                     Improve CV with keywords
                   </button>

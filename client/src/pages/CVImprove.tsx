@@ -161,16 +161,17 @@ export default function CVImprove() {
         </div>
       ) : cvSource === "pdf" ? (
         <div className="max-w-5xl mx-auto space-y-6 pb-20">
-           <div className="flex justify-between items-center bg-indigo-900 text-white p-6 rounded-[2rem] shadow-lg">
-             <div>
-               <h4 className="font-bold flex items-center gap-2">
-                 <Sparkles className="w-5 h-5" /> PDF Review & Annotation
+           <div className="flex justify-between items-center bg-indigo-900 text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden group">
+             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/20 transition-colors" />
+             <div className="relative z-10">
+               <h4 className="text-xl font-bold flex items-center gap-3 mb-1">
+                 <Sparkles className="w-6 h-6 text-indigo-300" /> PDF Review & Annotation
                </h4>
-               <p className="text-sm text-indigo-100">Click anywhere on the PDF to add a note.</p>
+               <p className="text-indigo-50/90 font-medium">Click anywhere on the PDF to add a note.</p>
              </div>
              <button 
                onClick={exportAnnotatedPdf}
-               className="px-6 py-2 bg-white text-indigo-900 rounded-xl font-bold hover:bg-indigo-50 transition-colors flex items-center gap-2"
+               className="relative z-10 px-6 py-3 bg-white text-indigo-900 rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-lg flex items-center gap-2"
              >
                <Download className="w-4 h-4" /> Export Annotated PDF
              </button>

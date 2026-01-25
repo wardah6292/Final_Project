@@ -186,11 +186,12 @@ export default function CoverLetterGenerator() {
               </div>
             </div>
 
-            <div className="bg-indigo-900 text-white p-6 rounded-[2rem] shadow-lg">
-              <h4 className="font-bold mb-2 flex items-center gap-2">
-                <Sparkles className="w-5 h-5" /> AI Guidance
+            <div className="bg-indigo-900 text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/20 transition-colors" />
+              <h4 className="text-xl font-bold mb-3 flex items-center gap-3 relative z-10">
+                <Sparkles className="w-6 h-6 text-indigo-300" /> AI Guidance
               </h4>
-              <p className="text-sm text-indigo-100 leading-relaxed italic">
+              <p className="text-indigo-50/90 text-lg leading-relaxed relative z-10 font-medium italic">
                 "We've focused on matching your experience with the key requirements mentioned in the JD. Don't forget to add a personal touch!"
               </p>
             </div>

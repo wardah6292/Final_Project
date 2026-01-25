@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { PageHeader } from "@/components/PageHeader";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { Briefcase, FileText, Search, ArrowRight, TrendingUp } from "lucide-react";
+import { Briefcase, FileText, Search, ArrowRight, TrendingUp, Sparkles } from "lucide-react";
 import { useApplications } from "@/hooks/use-applications";
 import { useDocuments } from "@/hooks/use-documents";
 
@@ -112,18 +112,20 @@ export default function Dashboard() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="bg-indigo-900 text-white p-8 rounded-3xl shadow-lg relative overflow-hidden"
+          className="bg-indigo-900 text-white p-8 rounded-[2.5rem] shadow-lg relative overflow-hidden group"
         >
-           <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/20 transition-colors" />
            
-           <h3 className="text-xl font-bold mb-4 relative z-10">Pro Tip of the Day</h3>
-           <p className="text-indigo-100 leading-relaxed mb-6 relative z-10">
+           <h3 className="text-2xl font-bold mb-4 relative z-10 flex items-center gap-3">
+             <Sparkles className="w-6 h-6 text-indigo-300" /> Pro Tip of the Day
+           </h3>
+           <p className="text-indigo-50/90 text-lg leading-relaxed mb-8 relative z-10 font-medium">
              Tailoring your resume for each application increases your chances of passing ATS scans by up to 50%. Try our Job Fit Analysis tool to see where you stand!
            </p>
            
            <Link href="/analysis">
-             <button className="relative z-10 px-6 py-3 bg-white text-indigo-900 rounded-xl font-bold text-sm hover:bg-indigo-50 transition-colors">
-               Try Analysis Tool
+             <button className="relative z-10 px-8 py-3.5 bg-white text-indigo-900 rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-lg flex items-center gap-2 group/btn">
+               Try Analysis Tool <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
              </button>
            </Link>
         </motion.div>
