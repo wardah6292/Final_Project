@@ -4,9 +4,11 @@ import { useDocuments } from "@/hooks/use-documents";
 import { useGenerateCoverLetter } from "@/hooks/use-analysis";
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, Copy, Check, Save, RefreshCw, FileText } from "lucide-react";
+import { Sparkles, Copy, Check, Save, RefreshCw, FileText, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateDocument } from "@/hooks/use-documents";
+import { Document, Packer, Paragraph, TextRun, AlignmentType } from "docx";
+import { saveAs } from "file-saver";
 
 import { ExportStep } from "@/components/ExportStep";
 
@@ -87,6 +89,57 @@ export default function CoverLetterGenerator() {
     navigator.clipboard.writeText(generatedContent);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const exportAsTxt = () => {
+    const element = document.createElement("a");
+    const file = new Blob([generatedContent], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = `Cover_Letter_${company.replace(/\s+/g, '_')}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    toast({ title: "Exported!", description: "Cover letter downloaded as .txt" });
+  };
+
+  const exportAsDocx = async () => {
+    try {
+      const doc = new Document({
+        sections: [{
+          properties: {},
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `${company} - ${role}`,
+                  bold: true,
+                  size: 32,
+                }),
+              ],
+              spacing: { after: 400 },
+              alignment: AlignmentType.CENTER,
+            }),
+            ...generatedContent.split('\n').map(line => 
+              new Paragraph({
+                children: [new TextRun(line)],
+                spacing: { after: 200 },
+              })
+            ),
+          ],
+        }],
+      });
+
+      const blob = await Packer.toBlob(doc);
+      saveAs(blob, `Cover_Letter_${company.replace(/\s+/g, '_')}.docx`);
+      toast({ title: "Exported!", description: "Cover letter downloaded as .docx" });
+    } catch (error) {
+      console.error("DOCX Error:", error);
+      toast({ 
+        title: "DOCX Export Failed", 
+        description: "Falling back to .txt format...", 
+        variant: "destructive" 
+      });
+      exportAsTxt();
+    }
   };
 
   return (
@@ -191,6 +244,13 @@ export default function CoverLetterGenerator() {
                 className="flex-1 h-14 bg-primary text-white rounded-2xl font-bold text-lg shadow-xl shadow-primary/20 hover:shadow-2xl transition-all flex items-center justify-center gap-2"
               >
                 <Save className="w-5 h-5" /> {isSaving ? "Saving..." : "Save cover letter to this application"}
+              </button>
+              <button 
+                onClick={exportAsDocx}
+                disabled={!generatedContent}
+                className="px-6 h-14 bg-white border-2 border-slate-100 text-slate-700 rounded-2xl font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+              >
+                <Download className="w-5 h-5" /> .docx
               </button>
             </div>
           </div>
