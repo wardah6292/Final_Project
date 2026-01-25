@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { PageHeader } from "@/components/PageHeader";
 import { useApplications, useCreateApplication, useUpdateApplication, useDeleteApplication } from "@/hooks/use-applications";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, MoreVertical, Trash2, ExternalLink, Calendar, Building } from "lucide-react";
+import { Plus, MoreVertical, Trash2, ExternalLink, Calendar, Building, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -15,6 +15,7 @@ import { insertApplicationSchema } from "@shared/schema";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useLocation } from "wouter";
 
 const statuses = ["Saved", "Applied", "Interview", "Rejected"];
 
@@ -26,6 +27,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function ApplicationTracker() {
+  const [, setLocation] = useLocation();
   const { data: applications, isLoading } = useApplications();
   const deleteApp = useDeleteApplication();
   const updateApp = useUpdateApplication();
@@ -46,6 +48,12 @@ export default function ApplicationTracker() {
 
   return (
     <Layout>
+      <div className="mb-6">
+        <button onClick={() => setLocation('/dashboard')} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors font-medium">
+          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+        </button>
+      </div>
+
       <PageHeader 
         title="Application Tracker" 
         description="Manage your job applications and track your progress."

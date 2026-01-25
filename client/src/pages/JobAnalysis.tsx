@@ -5,7 +5,7 @@ import { useAnalyzeFit } from "@/hooks/use-analysis";
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
-import { Sparkles, AlertTriangle, CheckCircle, XCircle, Search } from "lucide-react";
+import { Sparkles, AlertTriangle, CheckCircle, XCircle, Search, ArrowLeft } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "wouter";
 
@@ -44,6 +44,12 @@ export default function JobAnalysis() {
 
   return (
     <Layout>
+      <div className="mb-6">
+        <button onClick={() => setLocation('/dashboard')} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors font-medium">
+          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+        </button>
+      </div>
+
       <PageHeader 
         title="Job Fit Analysis" 
         description="See how well your CV matches a job description."

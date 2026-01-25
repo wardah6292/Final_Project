@@ -1,7 +1,7 @@
 import { Layout } from "@/components/Layout";
 import { PageHeader } from "@/components/PageHeader";
 import { useLocation } from "wouter";
-import { Sparkles, ArrowRight, CheckCircle, Save, FileText, Type, Undo, Download, Trash2, Plus, FileUp } from "lucide-react";
+import { Sparkles, ArrowRight, CheckCircle, Save, FileText, Type, Undo, Download, Trash2, Plus, FileUp, ArrowLeft } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useDocuments, useCreateDocument } from "@/hooks/use-documents";
@@ -116,6 +116,12 @@ export default function CVImprove() {
 
   return (
     <Layout>
+      <div className="mb-6">
+        <button onClick={() => setLocation('/analysis')} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors font-medium">
+          <ArrowLeft className="w-4 h-4" /> Back to Analysis
+        </button>
+      </div>
+
       <PageHeader 
         title="CV Improvements" 
         description="Refine your CV to perfectly match the job description."

@@ -4,15 +4,17 @@ import { useDocuments } from "@/hooks/use-documents";
 import { useGenerateCoverLetter } from "@/hooks/use-analysis";
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, Copy, Check, Save, RefreshCw, FileText, Download } from "lucide-react";
+import { Sparkles, Copy, Check, Save, RefreshCw, FileText, Download, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateDocument } from "@/hooks/use-documents";
 import { Document, Packer, Paragraph, TextRun, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
+import { useLocation } from "wouter";
 
 import { ExportStep } from "@/components/ExportStep";
 
 export default function CoverLetterGenerator() {
+  const [, setLocation] = useLocation();
   const { data: documents } = useDocuments();
   const generateMutation = useGenerateCoverLetter();
   const createDoc = useCreateDocument();
@@ -139,6 +141,12 @@ export default function CoverLetterGenerator() {
 
   return (
     <Layout>
+      <div className="mb-6">
+        <button onClick={() => setLocation('/analysis')} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors font-medium">
+          <ArrowLeft className="w-4 h-4" /> Back to Analysis
+        </button>
+      </div>
+
       <PageHeader 
         title="Cover Letter Draft" 
         description="Your AI-powered draft is ready for review."

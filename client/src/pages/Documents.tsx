@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { PageHeader } from "@/components/PageHeader";
 import { useDocuments, useCreateDocument, useDeleteDocument } from "@/hooks/use-documents";
 import { motion } from "framer-motion";
-import { FileText, Plus, Trash2, FileType } from "lucide-react";
+import { FileText, Plus, Trash2, FileType, ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -11,8 +11,10 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLocation } from "wouter";
 
 export default function Documents() {
+  const [, setLocation] = useLocation();
   const { data: documents, isLoading } = useDocuments();
   const deleteDoc = useDeleteDocument();
   const { toast } = useToast();
@@ -31,6 +33,12 @@ export default function Documents() {
 
   return (
     <Layout>
+      <div className="mb-6">
+        <button onClick={() => setLocation('/dashboard')} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors font-medium">
+          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+        </button>
+      </div>
+
       <PageHeader 
         title="Documents" 
         description="Store your CVs and Cover Letters for quick access."
