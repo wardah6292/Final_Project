@@ -41,12 +41,15 @@ export default function UnifiedPdfEditor() {
 
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [useTextFallback, setUseTextFallback] = useState(false);
+  const [fallbackText, setFallbackText] = useState("");
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type === "application/pdf") {
       setUploadProgress(0);
       setIsProcessing(true);
+      setUseTextFallback(false);
       const reader = new FileReader();
       
       reader.onprogress = (event) => {
@@ -58,12 +61,10 @@ export default function UnifiedPdfEditor() {
 
       reader.onload = () => {
         const result = reader.result as string;
-        // Small delay to show 100% and then transition
         setTimeout(() => {
           setPdfUrl(result);
           setAnnotations([]);
           setUploadProgress(null);
-          // Don't set isProcessing false here, wait for onLoadSuccess
           toast({ title: "File Read Complete", description: "Now rendering your PDF..." });
         }, 500);
       };
@@ -256,47 +257,75 @@ export default function UnifiedPdfEditor() {
               isAddingText ? 'cursor-crosshair border-primary/40 bg-primary/5 shadow-inner' : 'cursor-default'
             }`}
           >
-            <Document 
-              file={pdfUrl} 
-              onLoadSuccess={({ numPages }) => {
-                setNumPages(numPages);
-                setIsProcessing(false);
-              }} 
-              onLoadError={(error) => {
-                console.error("PDF Load Error:", error);
-                setIsProcessing(false);
-                setPdfUrl(null); // Reset URL on error
-                toast({ 
-                  title: "Rendering Error", 
-                  description: "Could not display the PDF. It might be too large or corrupted.",
-                  variant: "destructive" 
-                });
-              }}
-              options={{
-                cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
-                cMapPacked: true,
-                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
-              }}
-              loading={
-                <div className="flex flex-col items-center gap-4 py-20">
-                  <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="text-slate-500 font-medium">Rendering PDF pages...</p>
+            {pdfUrl && !useTextFallback ? (
+              <Document 
+                file={pdfUrl} 
+                onLoadSuccess={({ numPages }) => {
+                  setNumPages(numPages);
+                  setIsProcessing(false);
+                }} 
+                onLoadError={(error) => {
+                  console.error("PDF Load Error:", error);
+                  setIsProcessing(false);
+                  setUseTextFallback(true);
+                  toast({ 
+                    title: "Rendering Problem", 
+                    description: "Switching to text mode for better compatibility.",
+                  });
+                }}
+                options={{
+                  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                  cMapPacked: true,
+                  standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+                }}
+                loading={
+                  <div className="flex flex-col items-center gap-4 py-20">
+                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                    <p className="text-slate-500 font-medium">Rendering PDF pages...</p>
+                    <button 
+                      onClick={() => setUseTextFallback(true)}
+                      className="text-primary hover:underline text-sm font-medium mt-4"
+                    >
+                      Taking too long? Use text mode instead
+                    </button>
+                  </div>
+                }
+                className="shadow-2xl"
+              >
+                {Array.from(new Array(numPages || 0), (el, index) => (
+                  <Page 
+                    key={`page_${index + 1}`} 
+                    pageNumber={index + 1} 
+                    width={700} 
+                    renderAnnotationLayer={false} 
+                    renderTextLayer={false} 
+                    className="mb-4"
+                    loading={<div className="h-[1000px] w-[700px] bg-white border border-slate-100 animate-pulse rounded-xl flex items-center justify-center text-slate-400">Loading Page {index + 1}...</div>}
+                  />
+                ))}
+              </Document>
+            ) : useTextFallback ? (
+              <div className="w-full max-w-3xl bg-white rounded-3xl p-10 shadow-xl border-2 border-slate-100 min-h-[800px] flex flex-col gap-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100 text-amber-800">
+                    <FileText className="w-5 h-5 shrink-0" />
+                    <p className="text-sm">We're using <strong>Compatibility Mode</strong> because your PDF is complex. You can still add notes below!</p>
+                  </div>
+                  <button 
+                    onClick={() => setUseTextFallback(false)}
+                    className="text-slate-400 hover:text-slate-600 text-sm font-medium"
+                  >
+                    Try PDF again
+                  </button>
                 </div>
-              }
-              className="shadow-2xl"
-            >
-              {Array.from(new Array(numPages || 0), (el, index) => (
-                <Page 
-                  key={`page_${index + 1}`} 
-                  pageNumber={index + 1} 
-                  width={700} 
-                  renderAnnotationLayer={false} 
-                  renderTextLayer={false} 
-                  className="mb-4"
-                  loading={<div className="h-[1000px] w-[700px] bg-white border border-slate-100 animate-pulse rounded-xl flex items-center justify-center text-slate-400">Loading Page {index + 1}...</div>}
+                <textarea
+                  className="w-full flex-1 bg-slate-50 rounded-2xl p-6 text-slate-700 font-serif text-lg leading-relaxed focus:outline-none border-none resize-none"
+                  placeholder="Paste your CV content here or just start adding notes..."
+                  value={fallbackText}
+                  onChange={(e) => setFallbackText(e.target.value)}
                 />
-              ))}
-            </Document>
+              </div>
+            ) : null}
 
             {annotations.map(anno => (
               <div 
