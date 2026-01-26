@@ -127,7 +127,7 @@ export default function Dashboard() {
         >
            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/20 transition-colors" />
            
-           <h3 className="text-2xl font-bold mb-4 relative z-10 flex items-center gap-3">
+           <h3 className="text-2xl font-bold mb-4 relative z-10 flex items-center gap-3 text-white">
              <Sparkles className="w-6 h-6 text-indigo-300" /> Pro Tip of the Day
            </h3>
            <p className="text-indigo-50/90 text-lg leading-relaxed mb-8 relative z-10 font-medium">
