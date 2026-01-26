@@ -1,8 +1,32 @@
-import { Link } from "wouter";
-import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Sparkles, Briefcase } from "lucide-react";
+import { useState } from "react";
 
 export default function Welcome() {
+  const [, setLocation] = useLocation();
+  const [showProfessionModal, setShowProfessionModal] = useState(false);
+  const [profession, setProfession] = useState("");
+
+  const handleStart = async () => {
+    if (!profession) {
+      setShowProfessionModal(true);
+      return;
+    }
+
+    try {
+      // In a prototype, we'll just save it to the first user or mock the update
+      await fetch("/api/user/profession", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profession }),
+      });
+      setLocation('/onboarding/step/1');
+    } catch (err) {
+      setLocation('/onboarding/step/1');
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 relative overflow-hidden">
       {/* Abstract Background Shapes */}
@@ -36,12 +60,13 @@ export default function Welcome() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link href="/onboarding/step/1">
-              <button className="btn-bounce group flex items-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl font-bold text-lg shadow-xl shadow-primary/30 hover:shadow-2xl hover:bg-primary/90 transition-all">
-                Get Started
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </Link>
+            <button 
+              onClick={handleStart}
+              className="btn-bounce group flex items-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl font-bold text-lg shadow-xl shadow-primary/30 hover:shadow-2xl hover:bg-primary/90 transition-all"
+            >
+              Get Started
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
             <Link href="/dashboard">
               <button className="px-8 py-4 bg-white text-slate-600 rounded-2xl font-bold text-lg border border-slate-200 hover:bg-slate-50 transition-all">
                 Skip for now
@@ -56,8 +81,6 @@ export default function Welcome() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="hidden md:block relative"
         >
-          {/* Friendly image using Unsplash */}
-          {/* woman working happily on laptop with coffee in bright room */}
           <div className="relative rounded-3xl overflow-hidden shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
             <img 
               src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&auto=format&fit=crop&q=60" 
@@ -67,7 +90,6 @@ export default function Welcome() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           </div>
           
-          {/* Floating badges */}
           <motion.div 
             animate={{ y: [0, -10, 0] }}
             transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
@@ -83,6 +105,54 @@ export default function Welcome() {
           </motion.div>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {showProfessionModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+              onClick={() => setShowProfessionModal(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-lg bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              
+              <div className="relative z-10 text-center space-y-6">
+                <div className="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Briefcase className="w-8 h-8" />
+                </div>
+                
+                <h3 className="text-3xl font-bold text-slate-900">What's your dream job?</h3>
+                <p className="text-slate-500 font-medium">Knowing your profession helps me give you custom market trends and skills! 🚀</p>
+                
+                <input 
+                  type="text"
+                  placeholder="e.g. Software Engineer, Marketing Specialist..."
+                  value={profession}
+                  onChange={(e) => setProfession(e.target.value)}
+                  className="w-full h-16 px-6 bg-slate-50 border-2 border-slate-100 rounded-2xl text-lg font-bold text-slate-800 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+                  autoFocus
+                />
+                
+                <button 
+                  onClick={handleStart}
+                  disabled={!profession}
+                  className="w-full h-16 bg-primary text-white rounded-[1.5rem] font-bold text-xl shadow-xl shadow-primary/20 hover:bg-primary/90 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
+                >
+                  Continue <ArrowRight className="w-6 h-6" />
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

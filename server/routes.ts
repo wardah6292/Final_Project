@@ -96,6 +96,55 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
+  // --- Market Trends ---
+
+  app.get("/api/market-trends", async (req, res) => {
+    try {
+      const user = (await storage.getUsers())[0];
+      const profession = user?.profession || "Software Engineer";
+
+      const prompt = `
+        As a career expert, provide the latest market trends and top skills for the profession: "${profession}".
+        
+        Return a JSON object with:
+        - profession: string
+        - topSkills: array of 5 most in-demand skills
+        - trends: array of 3 current industry trends (short sentences)
+      `;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "system", content: "You are a helpful career advisor." }, { role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+      });
+
+      const content = response.choices[0].message.content;
+      if (!content) throw new Error("No response from AI");
+
+      res.json(JSON.parse(content));
+    } catch (err) {
+      console.error("Market trends failed:", err);
+      res.status(500).json({ message: "Failed to fetch market trends" });
+    }
+  });
+
+  app.post("/api/user/profession", async (req, res) => {
+    try {
+      const { profession } = req.body;
+      if (!profession) return res.status(400).json({ message: "Profession is required" });
+      
+      const users = await storage.getUsers();
+      if (users.length > 0) {
+        await storage.updateUserProfession(users[0].id, profession);
+      } else {
+        await storage.createUser({ profession });
+      }
+      res.json({ message: "Profession updated" });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to update profession" });
+    }
+  });
+
   // --- AI Analysis ---
 
   app.post(api.analysis.analyze.path, async (req, res) => {

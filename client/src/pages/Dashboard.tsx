@@ -2,13 +2,24 @@ import { Layout } from "@/components/Layout";
 import { PageHeader } from "@/components/PageHeader";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { Briefcase, FileText, Search, ArrowRight, TrendingUp, Sparkles } from "lucide-react";
+import { Briefcase, FileText, Search, ArrowRight, TrendingUp, Sparkles, Zap, BarChart3 } from "lucide-react";
 import { useApplications } from "@/hooks/use-applications";
 import { useDocuments } from "@/hooks/use-documents";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Dashboard() {
   const { data: applications } = useApplications();
   const { data: documents } = useDocuments();
+  
+  // Fetch market trends based on profession
+  const { data: trends, isLoading: trendsLoading } = useQuery({
+    queryKey: ["/api/market-trends"],
+    queryFn: async () => {
+      const res = await fetch("/api/market-trends");
+      if (!res.ok) return null;
+      return res.json();
+    }
+  });
 
   const activeApps = applications?.filter(a => a.status !== "Rejected").length || 0;
   const interviewCount = applications?.filter(a => a.status === "Interview").length || 0;
@@ -128,6 +139,67 @@ export default function Dashboard() {
                Try Analysis Tool <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
              </button>
            </Link>
+        </motion.div>
+
+        {/* Market Trends & Skills */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 md:col-span-2"
+        >
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+                <BarChart3 className="w-7 h-7 text-primary" /> Market Insights
+              </h3>
+              <p className="text-slate-500 mt-1 font-medium">Trends and top skills for your profession</p>
+            </div>
+            {trends?.profession && (
+              <div className="px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-bold uppercase tracking-wider">
+                {trends.profession}
+              </div>
+            )}
+          </div>
+
+          {trendsLoading ? (
+            <div className="space-y-4">
+              <div className="h-24 bg-slate-50 rounded-2xl animate-pulse" />
+              <div className="h-32 bg-slate-50 rounded-2xl animate-pulse" />
+            </div>
+          ) : trends ? (
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <h4 className="font-bold text-slate-700 flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-amber-500" /> Hot Skills to Learn
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {trends.topSkills?.map((skill: string) => (
+                    <span key={skill} className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-bold border border-indigo-100 shadow-sm">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h4 className="font-bold text-slate-700 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-green-500" /> Industry Trends
+                </h4>
+                <ul className="space-y-3">
+                  {trends.trends?.map((trend: string, i: number) => (
+                    <li key={i} className="flex items-start gap-3 text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                      <span className="text-sm font-medium">{trend}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-slate-400 font-medium italic">"Tell us your profession during onboarding to see custom market insights here!"</p>
+            </div>
+          )}
         </motion.div>
       </div>
     </Layout>

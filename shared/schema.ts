@@ -7,6 +7,7 @@ import { z } from "zod";
 // This allows for future expansion if needed.
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
+  profession: text("profession"), // User's stated profession
   onboardingData: jsonb("onboarding_data"), // Stores answers from Q1, Q2
   createdAt: timestamp("created_at").defaultNow(),
 });
