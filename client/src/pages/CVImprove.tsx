@@ -212,13 +212,23 @@ export default function CVImprove() {
               )}
             </div>
             <button
-              disabled={!selectedCvId}
               onClick={() => {
                 const doc = documents?.find(d => d.id.toString() === selectedCvId);
                 if (doc) {
-                  setCvContent(doc.content);
-                  setCvSource("paste");
-                  toast({ title: "CV Loaded!", description: `Loaded ${doc.name}.` });
+                  // We'll pass the PDF URL if available. 
+                  // In this prototype, we'll assume if it's a PDF name, 
+                  // we might have a stored content that could be a data URI or similar.
+                  // If it's just text, the CvPdfEditor will show the empty state.
+                  const isPdf = doc.name.toLowerCase().endsWith('.pdf');
+                  if (isPdf) {
+                    // Check if content looks like a data URI or blob
+                    const hasPdfData = doc.content.startsWith('data:application/pdf');
+                    setLocation(`/cv/pdf?url=${encodeURIComponent(hasPdfData ? doc.content : '')}&name=${encodeURIComponent(doc.name)}`);
+                  } else {
+                    setCvContent(doc.content);
+                    setCvSource("paste");
+                    toast({ title: "CV Loaded!", description: `Loaded ${doc.name}.` });
+                  }
                 }
               }}
               className="w-full h-16 bg-primary text-white rounded-2xl font-bold text-xl shadow-xl shadow-primary/20 hover:bg-primary/90 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
