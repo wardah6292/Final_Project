@@ -13,7 +13,9 @@ import { eq, desc } from "drizzle-orm";
 export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
+  getUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserProfession(id: number, profession: string): Promise<User>;
 
   // Documents
   getDocuments(userId?: number): Promise<Document[]>;
@@ -44,6 +46,18 @@ export class DatabaseStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const [newUser] = await db.insert(users).values(user).returning();
     return newUser;
+  }
+
+  async getUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
+  async updateUserProfession(id: number, profession: string): Promise<User> {
+    const [updatedUser] = await db.update(users)
+      .set({ profession })
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
   }
 
   async getDocuments(userId?: number): Promise<Document[]> {
