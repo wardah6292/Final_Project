@@ -19,14 +19,14 @@ export default function CVSetup() {
       toast({ title: "Content required", description: "Please paste your CV text.", variant: "destructive" });
       return;
     }
-    if (method === "upload" && !fileName) {
+    if (method === "upload" && !content) {
       toast({ title: "File required", description: "Please upload your CV file.", variant: "destructive" });
       return;
     }
 
     createDoc.mutate({
       name: fileName || "Pasted CV",
-      content: content || `Simulated upload: ${fileName}`,
+      content: content,
       type: "cv",
       userId: 1
     }, {
@@ -34,6 +34,26 @@ export default function CVSetup() {
         setLocation("/setup-cl");
       }
     });
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setFileName(file.name);
+    
+    if (file.type === "application/pdf") {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64Content = event.target?.result as string;
+        setContent(base64Content);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // For non-PDF files, we might still want to store name but we won't have PDF viewer support
+      // For now, let's just toast
+      toast({ title: "PDF Recommended", description: "Uploading a PDF will allow you to view it later in the viewer." });
+    }
   };
 
   return (
@@ -77,8 +97,9 @@ export default function CVSetup() {
             <input
               type="file"
               id="cv-upload"
+              accept=".pdf"
               className="hidden"
-              onChange={(e) => setFileName(e.target.files?.[0]?.name || "")}
+              onChange={handleFileUpload}
             />
             <label htmlFor="cv-upload" className="cursor-pointer flex flex-col items-center gap-2">
               <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
