@@ -36,7 +36,8 @@ export default function CVImprove() {
   const initialCvContent = searchParams.get('cvContent') || '';
   const initialPdfUrl = searchParams.get('pdfUrl') || '';
 
-  const [cvSource, setCvSource] = useState<"saved" | "paste" | "pdf" | null>(initialPdfUrl ? "pdf" : null);
+  const [cvSource, setCvSource] = useState<"saved" | "paste" | "pdf" | "select" | null>(initialPdfUrl ? "pdf" : null);
+  const [selectedCvId, setSelectedCvId] = useState<string>("");
   const [cvContent, setCvContent] = useState(initialCvContent);
   const [isSaving, setIsSaving] = useState(false);
   const [hasAppliedKeywords, setHasAppliedKeywords] = useState(false);
@@ -67,6 +68,25 @@ export default function CVImprove() {
       setHasAppliedKeywords(false);
       toast({ title: "Reverted", description: "Keyword additions removed." });
     }
+  };
+
+  const exportAsPdf = async () => {
+    const doc = new jsPDF();
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const contentWidth = pageWidth - (margin * 2);
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("CV Improvement Draft", margin, 30);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    const lines = doc.splitTextToSize(cvContent, contentWidth);
+    doc.text(lines, margin, 45);
+    
+    doc.save(`CV_Improved_${new Date().toISOString().split('T')[0]}.pdf`);
+    toast({ title: "Exported!", description: "CV downloaded as PDF." });
   };
 
   const handleSaveDraft = () => {
@@ -138,15 +158,24 @@ export default function CVImprove() {
       ) : !cvSource ? (
         <div className="flex flex-col items-center justify-center py-12">
           <h3 className="text-2xl font-bold text-slate-800 mb-8">Where should we start?</h3>
-          <div className="grid md:grid-cols-2 gap-6 w-full max-w-2xl">
+          <div className="grid md:grid-cols-3 gap-6 w-full max-w-4xl">
+            <button
+              onClick={() => setCvSource("select")}
+              className="p-8 rounded-[2rem] border-2 border-slate-100 bg-white hover:border-primary/20 hover:shadow-xl transition-all flex flex-col items-center gap-4 group"
+            >
+              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                <FileText className="w-8 h-8" />
+              </div>
+              <span className="font-bold text-lg">Select Saved CV</span>
+            </button>
             <button
               onClick={() => setLocation('/cv/pdf-editor')}
               className="p-8 rounded-[2rem] border-2 border-slate-100 bg-white hover:border-primary/20 hover:shadow-xl transition-all flex flex-col items-center gap-4 group"
             >
               <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                <FileText className="w-8 h-8" />
+                <FileUp className="w-8 h-8" />
               </div>
-              <span className="font-bold text-lg">Use CV Draft Editor</span>
+              <span className="font-bold text-lg">Upload New PDF</span>
             </button>
             <button
               onClick={() => setCvSource("paste")}
@@ -156,6 +185,51 @@ export default function CVImprove() {
                 <Type className="w-8 h-8" />
               </div>
               <span className="font-bold text-lg">Paste CV Text</span>
+            </button>
+          </div>
+        </div>
+      ) : cvSource === "select" ? (
+        <div className="max-w-2xl mx-auto py-12 space-y-8">
+          <h3 className="text-2xl font-bold text-slate-800 text-center">Select a CV to Improve</h3>
+          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl space-y-6">
+            <div className="space-y-4">
+              {cvs.map(doc => (
+                <button
+                  key={doc.id}
+                  onClick={() => setSelectedCvId(doc.id.toString())}
+                  className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center gap-4 ${
+                    selectedCvId === doc.id.toString() 
+                    ? "border-primary bg-primary/5 ring-4 ring-primary/10" 
+                    : "border-slate-100 hover:border-slate-200"
+                  }`}
+                >
+                  <FileText className={`w-6 h-6 ${selectedCvId === doc.id.toString() ? "text-primary" : "text-slate-400"}`} />
+                  <span className="font-bold text-slate-700">{doc.name}</span>
+                </button>
+              ))}
+              {cvs.length === 0 && (
+                <p className="text-center text-slate-400 italic py-4">No saved CVs found.</p>
+              )}
+            </div>
+            <button
+              disabled={!selectedCvId}
+              onClick={() => {
+                const doc = documents?.find(d => d.id.toString() === selectedCvId);
+                if (doc) {
+                  setCvContent(doc.content);
+                  setCvSource("paste");
+                  toast({ title: "CV Loaded!", description: `Loaded ${doc.name}.` });
+                }
+              }}
+              className="w-full h-16 bg-primary text-white rounded-2xl font-bold text-xl shadow-xl shadow-primary/20 hover:bg-primary/90 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
+            >
+              Start Improving <ArrowRight className="w-6 h-6" />
+            </button>
+            <button 
+              onClick={() => setCvSource(null)}
+              className="w-full text-slate-400 font-bold hover:text-slate-600 transition-colors"
+            >
+              Go Back
             </button>
           </div>
         </div>
@@ -302,6 +376,13 @@ export default function CVImprove() {
               <div className="flex justify-between items-center mb-4">
                 <h4 className="font-bold text-slate-800">CV Editor</h4>
                 <div className="flex gap-2">
+                  <button
+                    onClick={exportAsPdf}
+                    disabled={!cvContent}
+                    className="px-4 py-2 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20"
+                  >
+                    <Download className="w-4 h-4" /> Export PDF
+                  </button>
                   <button
                     onClick={handleSaveDraft}
                     disabled={isSaving || !cvContent}
