@@ -40,7 +40,7 @@ export async function registerRoutes(
 
   app.put(api.applications.update.path, async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const input = api.applications.update.input.parse(req.body);
       const updated = await storage.updateApplication(id, input);
       res.json(updated);
@@ -53,13 +53,13 @@ export async function registerRoutes(
   });
 
   app.delete(api.applications.delete.path, async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     await storage.deleteApplication(id);
     res.status(204).send();
   });
 
   app.get(api.applications.get.path, async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const app = await storage.getApplication(id);
     if (!app) return res.status(404).json({ message: "Application not found" });
 
@@ -91,7 +91,7 @@ export async function registerRoutes(
   });
 
   app.delete(api.documents.delete.path, async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     await storage.deleteDocument(id);
     res.status(204).send();
   });
