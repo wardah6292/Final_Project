@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { useApplications, useCreateApplication, useUpdateApplication, useDeleteApplication } from "@/hooks/use-applications";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, MoreVertical, Trash2, ExternalLink, Calendar, Building, ArrowLeft, Pencil } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -192,7 +192,7 @@ function CreateApplicationDialog({
   });
 
   // Update form when editingApp changes
-  useState(() => {
+  useEffect(() => {
     if (editingApp) {
       form.reset({
         company: editingApp.company,
@@ -202,11 +202,13 @@ function CreateApplicationDialog({
       });
     } else {
       form.reset({
+        company: "",
+        role: "",
         status: "Saved",
         userId: 1
       });
     }
-  });
+  }, [editingApp, form]);
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     if (editingApp) {
