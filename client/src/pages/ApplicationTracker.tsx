@@ -68,75 +68,79 @@ export default function ApplicationTracker() {
       <CreateApplicationDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
 
       {isLoading ? (
-        <div className="grid md:grid-cols-4 gap-6">
-          {[1,2,3,4].map(i => <div key={i} className="h-64 bg-slate-100 animate-pulse rounded-3xl" />)}
+        <div className="space-y-4">
+          {[1,2,3,4].map(i => <div key={i} className="h-20 bg-slate-100 animate-pulse rounded-2xl" />)}
         </div>
       ) : (
-        <div className="overflow-x-auto pb-8">
-          <div className="flex gap-6 min-w-[1000px]">
-            {statuses.map((status) => {
-              const columnApps = applications?.filter(a => a.status === status) || [];
-              
-              return (
-                <div key={status} className="flex-1 min-w-[280px]">
-                  <div className="flex items-center justify-between mb-4 px-2">
-                    <h3 className="font-bold text-slate-700">{status}</h3>
-                    <span className="text-xs font-bold bg-slate-100 px-2 py-1 rounded-lg text-slate-500">{columnApps.length}</span>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <AnimatePresence>
-                      {columnApps.map((app) => (
-                        <motion.div
-                          key={app.id}
-                          layout
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          className="group bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 relative"
+        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100">
+                  <th className="px-6 py-4 font-bold text-slate-600 text-sm">Role</th>
+                  <th className="px-6 py-4 font-bold text-slate-600 text-sm">Company</th>
+                  <th className="px-6 py-4 font-bold text-slate-600 text-sm">Status</th>
+                  <th className="px-6 py-4 font-bold text-slate-600 text-sm">Added</th>
+                  <th className="px-6 py-4 font-bold text-slate-600 text-sm text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <AnimatePresence mode="popLayout">
+                  {applications?.map((app) => (
+                    <motion.tr
+                      key={app.id}
+                      layout
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="group border-b border-slate-50 hover:bg-indigo-50/30 transition-colors"
+                    >
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-indigo-50 text-primary rounded-xl shrink-0">
+                            <Building className="w-4 h-4" />
+                          </div>
+                          <span className="font-bold text-slate-800">{app.role}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5">
+                        <span className="text-slate-500 font-medium">{app.company}</span>
+                      </td>
+                      <td className="px-6 py-5">
+                        <select 
+                          className={`text-xs font-bold rounded-lg py-1.5 px-3 border-none cursor-pointer outline-none focus:ring-2 ring-primary/20 shadow-sm ${statusColors[app.status]}`}
+                          value={app.status}
+                          onChange={(e) => handleStatusChange(app.id, e.target.value)}
                         >
-                          <div className="flex justify-between items-start mb-3">
-                            <div className="p-2 bg-indigo-50 text-primary rounded-xl">
-                              <Building className="w-5 h-5" />
-                            </div>
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={() => handleDelete(app.id)} className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg">
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                          
-                          <h4 className="font-bold text-slate-800 text-lg mb-1">{app.role}</h4>
-                          <p className="text-slate-500 font-medium text-sm mb-4">{app.company}</p>
-                          
-                          <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-50">
-                            <span className="text-xs text-slate-400 flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {format(new Date(app.createdAt || new Date()), 'MMM d')}
-                            </span>
-                            
-                            {/* Quick Status Mover (Simple dropdown for prototype) */}
-                            <select 
-                              className="text-xs bg-slate-50 border-none rounded-lg py-1 pl-2 pr-1 cursor-pointer outline-none focus:ring-2 ring-primary/20"
-                              value={app.status}
-                              onChange={(e) => handleStatusChange(app.id, e.target.value)}
-                            >
-                              {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                    
-                    {columnApps.length === 0 && (
-                      <div className="h-32 border-2 border-dashed border-slate-100 rounded-2xl flex items-center justify-center text-slate-300 text-sm font-medium">
-                        No applications
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                          {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </td>
+                      <td className="px-6 py-5 text-slate-400 text-sm">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {format(new Date(app.createdAt || new Date()), 'MMM d, yyyy')}
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 text-right">
+                        <button 
+                          onClick={() => handleDelete(app.id)}
+                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </AnimatePresence>
+                {(!applications || applications.length === 0) && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-20 text-center text-slate-400 italic">
+                      No applications tracked yet. Click "Add Application" to get started!
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
