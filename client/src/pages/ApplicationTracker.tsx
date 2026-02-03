@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { PageHeader } from "@/components/PageHeader";
 import { useApplications, useCreateApplication, useUpdateApplication, useDeleteApplication } from "@/hooks/use-applications";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, MoreVertical, Trash2, ExternalLink, Calendar, Building, ArrowLeft } from "lucide-react";
+import { Plus, MoreVertical, Trash2, ExternalLink, Calendar, Building, ArrowLeft, Pencil } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -33,6 +33,7 @@ export default function ApplicationTracker() {
   const updateApp = useUpdateApplication();
   const { toast } = useToast();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingApp, setEditingApp] = useState<any>(null);
 
   const handleDelete = (id: number) => {
     if (confirm("Are you sure you want to delete this application?")) {
@@ -66,6 +67,11 @@ export default function ApplicationTracker() {
       />
       
       <CreateApplicationDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+      <CreateApplicationDialog 
+        open={!!editingApp} 
+        onOpenChange={(open) => !open && setEditingApp(null)} 
+        editingApp={editingApp} 
+      />
 
       {isLoading ? (
         <div className="space-y-4">
@@ -122,12 +128,20 @@ export default function ApplicationTracker() {
                         </div>
                       </td>
                       <td className="px-6 py-5 text-right">
-                        <button 
-                          onClick={() => handleDelete(app.id)}
-                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                          <button 
+                            onClick={() => setEditingApp(app)}
+                            className="p-2 text-slate-400 hover:text-primary hover:bg-indigo-50 rounded-xl transition-all"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(app.id)}
+                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </motion.tr>
                   ))}
@@ -149,15 +163,24 @@ export default function ApplicationTracker() {
 }
 
 // Separate component for the dialog form
-function CreateApplicationDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
+function CreateApplicationDialog({ 
+  open, 
+  onOpenChange, 
+  editingApp 
+}: { 
+  open: boolean, 
+  onOpenChange: (open: boolean) => void,
+  editingApp?: any
+}) {
   const createMutation = useCreateApplication();
+  const updateMutation = useUpdateApplication();
   const { toast } = useToast();
   
   const formSchema = z.object({
     company: z.string().min(1, "Company is required"),
     role: z.string().min(1, "Role is required"),
     status: z.string(),
-    userId: z.number().default(1), // Hardcoded for prototype
+    userId: z.number().default(1),
   });
   
   const form = useForm<z.infer<typeof formSchema>>({
@@ -168,21 +191,53 @@ function CreateApplicationDialog({ open, onOpenChange }: { open: boolean, onOpen
     }
   });
 
+  // Update form when editingApp changes
+  useState(() => {
+    if (editingApp) {
+      form.reset({
+        company: editingApp.company,
+        role: editingApp.role,
+        status: editingApp.status,
+        userId: editingApp.userId || 1
+      });
+    } else {
+      form.reset({
+        status: "Saved",
+        userId: 1
+      });
+    }
+  });
+
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    createMutation.mutate(data, {
-      onSuccess: () => {
-        toast({ title: "Success", description: "Application added!" });
-        onOpenChange(false);
-        form.reset();
-      }
-    });
+    if (editingApp) {
+      updateMutation.mutate({
+        id: editingApp.id,
+        ...data
+      }, {
+        onSuccess: () => {
+          toast({ title: "Updated", description: "Application updated successfully!" });
+          onOpenChange(false);
+          form.reset();
+        }
+      });
+    } else {
+      createMutation.mutate(data, {
+        onSuccess: () => {
+          toast({ title: "Success", description: "Application added!" });
+          onOpenChange(false);
+          form.reset();
+        }
+      });
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md rounded-3xl p-8">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-slate-800">Add Application</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-slate-800">
+            {editingApp ? "Edit Application" : "Add Application"}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
           <div className="space-y-2">
@@ -211,10 +266,12 @@ function CreateApplicationDialog({ open, onOpenChange }: { open: boolean, onOpen
 
           <button 
             type="submit" 
-            disabled={createMutation.isPending}
+            disabled={createMutation.isPending || updateMutation.isPending}
             className="w-full h-12 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
-            {createMutation.isPending ? "Adding..." : "Add Application"}
+            {createMutation.isPending || updateMutation.isPending 
+              ? (editingApp ? "Saving..." : "Adding...") 
+              : (editingApp ? "Save Changes" : "Add Application")}
           </button>
         </form>
       </DialogContent>
